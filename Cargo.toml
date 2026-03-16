@@ -1,0 +1,12 @@
+[package]
+name = "compression-btk"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bitvec = "1"
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+clap = { version = "4.6.0", features = ["derive"] }
+anyhow = "1.0"
+flate2 = "1.0"
