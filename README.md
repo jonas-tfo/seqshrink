@@ -24,3 +24,12 @@ compression-btk compress -i input.fasta -o output.blok -m dna2
 compression-btk decompress -i output.blok -o recovered.fasta
 ```
 
+## Example:
+
+Using the `dna3` mode on the genome assembly Avulg\_BH\_1.0 of Armadillidium vulgare (common pillbug):
+
+| File | Size |
+|------|------|
+| Original FASTA | 1.94 GB |
+| Compressed `.blok` | 736 MB |
+| **Reduction** | **~63%** (2.7× smaller) |
