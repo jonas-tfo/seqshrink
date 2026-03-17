@@ -19,43 +19,6 @@ use crate::compress::{
 };
 use crate::Compression;
 
-pub fn save_compressed_file(output_path: &str, header: Header, compressed_bits: BitVec<u8, Msb0>) -> Result<(), Box<dyn Error>>  {
-    let mut file = File::create(output_path)?;
-
-    let header_bytes = bincode::serialize(&header)?;
-    file.write_all(&header_bytes)?;
-    file.write_all(compressed_bits.as_raw_slice())?;
-
-    Ok(())
-}
-
-pub fn decode_compressed_file(input_path: &str) -> Result<Vec<u8>, Box<dyn Error>> {
-    let file = File::open(input_path)?;
-    let mut reader = BufReader::new(file);
-
-    let header: Header = bincode::deserialize_from(&mut reader)?;
-
-    if &header.magic != b"BLOK" {
-        return Err("invalid file: bad magic bytes".into());
-    }
-
-    let mut compressed_bytes = Vec::new();
-    reader.read_to_end(&mut compressed_bytes)?;
-
-    let bits = compressed_bytes.view_bits::<Msb0>();
-    let len = header.num_records as usize;
-
-    let result = match header.mode {
-        0 => Dna2BitCompression::decode(bits, len),
-        1 => Dna3BitCompression::decode(bits, len),
-        2 => Rna2BitCompression::decode(bits, len),
-        3 => Rna3BitCompression::decode(bits, len),
-        4 => Protein5BitCompression::decode(bits, len),
-        _ => return Err("unknown mode".into()),
-    };
-
-    Ok(result)
-}
 
 pub fn save_fasta_compressed(output_path: &str, mode: u8, ids: Vec<String>, sequences: Vec<String>) -> Result<(), Box<dyn Error>> {
     let file = File::create(output_path)?;
@@ -81,7 +44,7 @@ pub fn save_fasta_compressed(output_path: &str, mode: u8, ids: Vec<String>, sequ
             _ => return Err("unknown mode".into()),
         };
         let record = Record { length: seq_bytes.len() as u32, data: bits.into_vec() };
-        writer.write_all(&bincode::serialize(&record)?)?;
+        bincode::serialize_into(&mut writer, &record)?;
     }
 
     Ok(())
